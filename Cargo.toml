@@ -1,0 +1,10 @@
+[package]
+name = "downloader"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.50.0", features = ["full"] }
+reqwest = { version = "0.13.2", features = ["stream"] }
+dunce = "1.0.5"
+futures-util = "0.3.32"
