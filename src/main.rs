@@ -1,7 +1,6 @@
 use dunce;
 use futures_util::StreamExt;
 use reqwest;
-use std::env;
 use std::path::Path;
 use tokio::fs;
 use tokio::fs::File;
