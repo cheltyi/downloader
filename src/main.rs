@@ -1,3 +1,4 @@
+use std::cmp::min;
 use dunce;
 use futures_util::StreamExt;
 use reqwest;
@@ -6,6 +7,8 @@ use tokio::fs;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use clap::Parser;
+use indicatif::{ProgressStyle, ProgressBar};
+use std::time::Duration;
 
 
 #[derive(Parser, Debug)]
@@ -72,12 +75,23 @@ async fn download_file(dest: &str, path: &Path) -> Result<(), Box<dyn std::error
     };
     println!("total size: {:.2} {}", size, unit);
 
-    let mut file = File::create(path).await?;
-    println!("file created");
+    let pb = ProgressBar::new(total_size);
+    pb.set_style(ProgressStyle::default_bar()
+        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")?
+        .progress_chars("#>-"));
+    pb.enable_steady_tick(Duration::from_millis(75));
+    pb.set_message(format!("downloading to {}", path.display()));
+
+    let mut file = File::create(&path).await?;
+    let mut downloaded: u64 = 0;
+    pb.println("file created");
     let mut stream = res.bytes_stream();
     while let Some(item) = stream.next().await {
         let chunk = item?;
         file.write_all(&chunk).await?;
+        let a = min(downloaded + chunk.len() as u64, total_size);
+        downloaded = a;
+        pb.set_position(a);
     }
     Ok(())
 }
