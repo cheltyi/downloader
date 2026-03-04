@@ -1,14 +1,14 @@
-use std::cmp::min;
+use clap::Parser;
 use dunce;
 use futures_util::StreamExt;
+use indicatif::{ProgressBar, ProgressStyle};
 use reqwest;
+use std::cmp::min;
 use std::path::Path;
+use std::time::Duration;
 use tokio::fs;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
-use clap::Parser;
-use indicatif::{ProgressStyle, ProgressBar};
-use std::time::Duration;
 
 
 #[derive(Parser, Debug)]
@@ -19,7 +19,11 @@ struct Args {
     content: bool,
 
     /// Sets custom domain.
-    #[arg(short, long, default_value = "https://static.klipy.com/ii/4e7bea9f7a3371424e6c16ebc93252fe/84/ef/1ocFw0eIBjDcaP.gif")]
+    #[arg(
+        short,
+        long,
+        default_value = "https://static.klipy.com/ii/4e7bea9f7a3371424e6c16ebc93252fe/84/ef/1ocFw0eIBjDcaP.gif"
+    )]
     link: String,
 
     /// Sets custom output file.
@@ -28,18 +32,18 @@ struct Args {
 
     /// Sets custom output directory.
     #[arg(short, long, default_value = "downloads")]
-    directory: String
+    directory: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Args = Args::parse();
     let directory: &str = args.directory.as_str();
-    let filename: &str = args.filename.as_str() ;
+    let filename: &str = args.filename.as_str();
     let content: bool = args.content;
     if content {
         contentf(directory).await?;
-        return Ok(())
+        return Ok(());
     }
     if !Path::new(directory).exists() {
         fs::create_dir_all(directory).await?;
@@ -52,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     download_file(&link, &path).await?;
     let absolute_path = dunce::canonicalize(&path)?;
     println!(
-            "{} downloaded to {}! its absolute path is {}", link, filename, absolute_path.display()
+        "{} downloaded to {}! its absolute path is {}", link, filename, absolute_path.display()
     );
 
     Ok(())
