@@ -26,7 +26,7 @@ struct Args {
     link: String,
 
     /// Sets custom output file.
-    #[arg(short, long, default_value = "file.bin")]
+    #[arg(short, long, default_value = "image.gif")]
     filename: String,
 
     /// Sets custom output directory.
